@@ -29,13 +29,13 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 // API Endpoints
-app.MapGet("/schedule", ([FromQuery] bool fail, IBackgroundJobClient client) =>
+app.MapPost("/schedule", ([FromQuery] bool fail, IBackgroundJobClient client) =>
 {
     client.Schedule<DummyJob>(job => job.ExecuteAsync(fail), TimeSpan.Zero);
     return Results.Ok("Job scheduled!");
 });
 
-app.MapGet("/schedule-recurring", ([FromQuery] bool fail, IRecurringJobManager client) =>
+app.MapPost("/schedule-recurring", ([FromQuery] bool fail, IRecurringJobManager client) =>
 {
     client.AddOrUpdate<DummyRecurringJob>(
         "CleanupJob", 
@@ -78,7 +78,7 @@ public class DummyJob(ILogger<DummyJob> logger)
     }
 }
 
-[DisableConcurrentExecution(0)]
+[DisableConcurrentExecution(timeoutInSeconds: 0)]
 [AutomaticRetry(Attempts = 0)]
 public class DummyRecurringJob(ILogger<DummyRecurringJob> logger)
 {
